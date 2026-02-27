@@ -2,7 +2,7 @@
  * Project: SAMHIN First Draft
  * Author: Vishavdeep Sharma
  * Company: Navonsys Inc
- * Date: 2026-02-26
+ * Date: 2026-02-26 */
 // shared.js — injects nav and footer into every page
 
 const LOGO_SVG = `
