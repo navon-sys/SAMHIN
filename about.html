@@ -1,0 +1,256 @@
+/**
+ * Project: SAMHIN First Draft
+ * Author: Vishavdeep Sharma
+ * Company: Navonsys Inc
+ * Date: 2026-02-26
+ * Description: Displays the organization's mission, team profile, and impact statistics.
+ */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us – SAMHIN</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.about-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--light-border); margin-bottom: 36px; flex-wrap: wrap; }
+.about-tab { padding: 13px 20px; font-weight: 600; font-size: 0.88rem; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; color: var(--mid-gray); transition: all 0.2s; }
+.about-tab.active { color: var(--deep-teal); border-bottom-color: var(--deep-teal); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.mission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; }
+.mission-text p { font-size: 0.95rem; color: var(--charcoal); line-height: 1.8; margin-bottom: 18px; }
+.mission-visual { background: linear-gradient(135deg, #0d4a4d, #1A6B6E); border-radius: 20px; padding: 40px; color: white; text-align: center; }
+.mission-visual h3 { font-family: 'Lora', serif; font-size: 1.6rem; font-style: italic; margin-bottom: 16px; }
+.stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+.stat-item { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 16px; text-align: center; }
+.stat-num { font-family: 'Lora', serif; font-size: 1.8rem; font-weight: 700; color: var(--soft-gold); }
+.stat-label { font-size: 0.78rem; opacity: 0.8; margin-top: 4px; }
+/* TEAM GRID */
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+.team-card { background: white; border-radius: 14px; border: 1.5px solid var(--light-border); overflow: hidden; transition: box-shadow 0.2s, transform 0.2s; cursor: pointer; }
+.team-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); transform: translateY(-3px); }
+.team-avatar { height: 140px; background: linear-gradient(135deg, var(--deep-teal), #1e5a3a); display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 2.2rem; font-weight: 700; color: white; }
+.team-info { padding: 14px; }
+.team-name { font-weight: 700; font-size: 0.92rem; margin-bottom: 3px; }
+.team-title { font-size: 0.75rem; color: var(--mid-gray); line-height: 1.4; margin-bottom: 8px; }
+.team-expand-hint { font-size: 0.72rem; color: var(--deep-teal); font-weight: 600; }
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 16px; padding: 32px; max-width: 560px; width: 90%; max-height: 85vh; overflow-y: auto; position: relative; }
+.modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--mid-gray); }
+.modal-header { display: flex; gap: 18px; margin-bottom: 20px; }
+.modal-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--deep-teal), #1e5a3a); display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 1.5rem; font-weight: 700; color: white; flex-shrink: 0; }
+/* CONTACT */
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.contact-card { background: white; border-radius: 14px; border: 1.5px solid var(--light-border); padding: 24px; }
+.contact-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; }
+.contact-info-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 0.85rem; }
+.contact-info-row .icon { flex-shrink: 0; margin-top: 2px; }
+/* SPONSORS */
+.sponsors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.sponsor-card { background: white; border-radius: 12px; border: 1.5px solid var(--light-border); padding: 20px; text-align: center; }
+.sponsor-logo { width: 60px; height: 60px; border-radius: 50%; background: var(--warm-cream); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 12px; }
+.sponsor-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 4px; }
+.sponsor-level { font-size: 0.72rem; color: var(--mid-gray); }
+@media(max-width:768px) { .mission-grid { grid-template-columns: 1fr; } .contact-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="top-bar" id="top-bar"></div>
+<nav id="main-nav"></nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> › About Us</div>
+    <h1>About SAMHIN</h1>
+    <p>South Asian Mental Health Initiative & Network — serving the South Asian community since 2013.</p>
+  </div>
+</div>
+
+<section class="section section-cream">
+  <div class="about-tabs">
+    <div class="about-tab active" onclick="switchTab('mission',this)">Mission & History</div>
+    <div class="about-tab" onclick="switchTab('team',this)">Our Team & Board</div>
+    <div class="about-tab" onclick="switchTab('impact',this)">Impact Data</div>
+    <div class="about-tab" onclick="switchTab('sponsors',this)">Sponsors & Donors</div>
+    <div class="about-tab" onclick="switchTab('contact',this)">Contact</div>
+  </div>
+
+  <!-- MISSION -->
+  <div class="tab-content active" id="tab-mission">
+    <div class="mission-grid">
+      <div class="mission-text">
+        <div class="section-label">Our Purpose</div>
+        <div class="section-title" style="margin-bottom:16px">Who We Are</div>
+        <p>South Asian Mental Health Initiative & Network (SAMHIN) is a 501(c)(3) non-profit organization that addresses the mental health needs of the South Asian community in the United States.</p>
+        <p>Founded in 2013 by Dr. Vasudev Makhija, SAMHIN was born from a recognition that the South Asian community — one of the fastest-growing populations in America — faced unique barriers to mental health care: cultural stigma, language barriers, lack of culturally aware providers, and a shortage of community-based resources.</p>
+        <p>Our goal is to decrease the stigma and shame associated with mental illness and to offer free resources for people who seek help — including a free provider directory, support groups, educational events, and crisis resources.</p>
+        <p>Over 3.4 million South Asians live in the United States. SAMHIN is committed to ensuring every one of them has access to the support they deserve.</p>
+        <a href="#" class="btn-primary" onclick="switchTab('team', document.querySelectorAll('.about-tab')[1]); return false">Meet Our Team →</a>
+      </div>
+      <div class="mission-visual">
+        <h3>"Mental health is not a luxury. It is a human right."</h3>
+        <p style="font-size:0.85rem;opacity:0.8;margin-bottom:20px">— Dr. Vasudev Makhija, Founder & President</p>
+        <div class="stat-row">
+          <div class="stat-item"><div class="stat-num">2013</div><div class="stat-label">Year Founded</div></div>
+          <div class="stat-item"><div class="stat-num">Free</div><div class="stat-label">All Resources</div></div>
+          <div class="stat-item"><div class="stat-num">500+</div><div class="stat-label">Providers Listed</div></div>
+          <div class="stat-item"><div class="stat-num">NJ → USA</div><div class="stat-label">Growing Reach</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+  <div class="tab-content" id="tab-team">
+    <div class="section-label">Leadership</div>
+    <div class="section-title" style="margin-bottom:6px">Board of Directors</div>
+    <div class="section-sub">Click any card to read the full profile.</div>
+    <div class="team-grid" style="margin-bottom:40px">
+      <div class="team-card" onclick="openTeamModal('Dr. Vasudev N. Makhija, MD','Founder & President','VM','Diplomate, American Board of Psychiatry and Neurology. Distinguished Life Fellow, American Psychiatric Association. Founder and President of SAMHIN. Dr. Makhija has dedicated over three decades to serving the mental health needs of the South Asian community in New Jersey and across the United States. Under his leadership, SAMHIN has grown from a local initiative into a nationally recognized resource.')">
+        <div class="team-avatar">VM</div>
+        <div class="team-info"><div class="team-name">Dr. Vasudev N. Makhija</div><div class="team-title">Founder & President, Psychiatrist</div><div class="team-expand-hint">View full profile →</div></div>
+      </div>
+      <div class="team-card" onclick="openTeamModal('Pinki Patel','Board Member & Technology Lead','PP','Computer engineer with 35+ years of experience in technical and managerial roles. Pinki has been instrumental in driving SAMHIN\'s digital transformation, overseeing the website, provider directory, and technology infrastructure. She serves as a bridge between SAMHIN\'s mission and its digital capabilities.')">
+        <div class="team-avatar" style="background:linear-gradient(135deg,var(--saffron),#9A6E1A)">PP</div>
+        <div class="team-info"><div class="team-name">Pinki Patel</div><div class="team-title">Board Member · Technology Lead</div><div class="team-expand-hint">View full profile →</div></div>
+      </div>
+      <div class="team-card" onclick="openTeamModal('Aanya Jajoo','Board Member & Content Lead','AJ','Aanya brings expertise in mental health content strategy, culturally informed communications, and community outreach. She leads SAMHIN\'s content calendar, blog editorial direction, and social media strategy.')">
+        <div class="team-avatar" style="background:linear-gradient(135deg,#7C3AED,#4F46E5)">AJ</div>
+        <div class="team-info"><div class="team-name">Aanya Jajoo</div><div class="team-title">Board Member · Content & Outreach</div><div class="team-expand-hint">View full profile →</div></div>
+      </div>
+      <div class="team-card" onclick="openTeamModal('Lori Barber','Board Member & Design Lead','LB','Lori brings extensive experience in nonprofit communications, visual design, and brand development. She oversees SAMHIN\'s design refresh, color palette, and overall visual identity.')">
+        <div class="team-avatar" style="background:linear-gradient(135deg,#BE185D,#E11D48)">LB</div>
+        <div class="team-info"><div class="team-name">Lori Barber</div><div class="team-title">Board Member · Design & Communications</div><div class="team-expand-hint">View full profile →</div></div>
+      </div>
+      <div class="team-card" onclick="openTeamModal('Shree Sharma','Board Member','SS','Shree serves on SAMHIN\'s board with a focus on mental wellness programming, including the development of a dedicated wellness page for everyday motivation and life challenges.')">
+        <div class="team-avatar" style="background:linear-gradient(135deg,#059669,#0D9488)">SS</div>
+        <div class="team-info"><div class="team-name">Shree Sharma</div><div class="team-title">Board Member · Wellness Programs</div><div class="team-expand-hint">View full profile →</div></div>
+      </div>
+      <div class="team-card" onclick="openTeamModal('Advisory Panel Member','Advisory Panel','AP','SAMHIN\'s Advisory Panel brings together mental health professionals, community leaders, and advocates from across the South Asian community. Their expertise guides SAMHIN\'s programming, content, and community partnerships.')">
+        <div class="team-avatar" style="background:linear-gradient(135deg,#0369A1,#0891B2)">AP</div>
+        <div class="team-info"><div class="team-name">Advisory Panel</div><div class="team-title">Mental Health Professionals & Community Leaders</div><div class="team-expand-hint">View panel members →</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPACT -->
+  <div class="tab-content" id="tab-impact">
+    <div class="section-label">Our Impact</div>
+    <div class="section-title" style="margin-bottom:6px">What We've Accomplished</div>
+    <div class="section-sub">SAMHIN tracks impact data to ensure transparency and accountability to our community and donors.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:36px">
+      <div style="background:white;border-radius:14px;padding:24px;text-align:center;border:1.5px solid var(--light-border)">
+        <div style="font-family:'Lora',serif;font-size:2.5rem;font-weight:700;color:var(--deep-teal)">500+</div>
+        <div style="font-size:0.85rem;color:var(--mid-gray);margin-top:6px">Mental Health Providers in Directory</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:24px;text-align:center;border:1.5px solid var(--light-border)">
+        <div style="font-family:'Lora',serif;font-size:2.5rem;font-weight:700;color:var(--saffron)">11 yrs</div>
+        <div style="font-size:0.85rem;color:var(--mid-gray);margin-top:6px">Serving South Asian Communities</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:24px;text-align:center;border:1.5px solid var(--light-border)">
+        <div style="font-family:'Lora',serif;font-size:2.5rem;font-weight:700;color:var(--deep-teal)">1,000+</div>
+        <div style="font-size:0.85rem;color:var(--mid-gray);margin-top:6px">People Connected to Support</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:24px;text-align:center;border:1.5px solid var(--light-border)">
+        <div style="font-family:'Lora',serif;font-size:2.5rem;font-weight:700;color:var(--saffron)">Free</div>
+        <div style="font-size:0.85rem;color:var(--mid-gray);margin-top:6px">All Resources & Programs</div>
+      </div>
+    </div>
+    <div style="background:white;border-radius:14px;padding:28px;border:1.5px solid var(--light-border)">
+      <h3 style="font-family:'Lora',serif;font-size:1.1rem;margin-bottom:16px">📊 Detailed Impact Report</h3>
+      <p style="font-size:0.88rem;color:var(--mid-gray);line-height:1.7;margin-bottom:16px">SAMHIN is committed to sharing anonymized service metrics, demographic reach, and outcome indicators to build trust with our community and donors. A full impact report is available upon request.</p>
+      <a href="mailto:info@samhin.org?subject=Impact Report Request" class="btn-outline" style="font-size:0.85rem">Request Full Impact Report</a>
+    </div>
+  </div>
+
+  <!-- SPONSORS -->
+  <div class="tab-content" id="tab-sponsors">
+    <div class="section-label">Support & Recognition</div>
+    <div class="section-title" style="margin-bottom:6px">Our Donors & Supporters</div>
+    <div class="section-sub">SAMHIN is grateful to the individuals, foundations, and organizations whose generosity makes our work possible.</div>
+    <div class="sponsors-grid" style="margin-bottom:32px">
+      <div class="sponsor-card"><div class="sponsor-logo">🏆</div><div class="sponsor-name">Platinum Supporter</div><div class="sponsor-level">Annual contribution $5,000+</div></div>
+      <div class="sponsor-card"><div class="sponsor-logo">🥇</div><div class="sponsor-name">Gold Supporter</div><div class="sponsor-level">Annual contribution $2,500+</div></div>
+      <div class="sponsor-card"><div class="sponsor-logo">🥈</div><div class="sponsor-name">Silver Supporter</div><div class="sponsor-level">Annual contribution $1,000+</div></div>
+      <div class="sponsor-card"><div class="sponsor-logo">🤝</div><div class="sponsor-name">Community Sponsor</div><div class="sponsor-level">Annual contribution $500+</div></div>
+    </div>
+    <div style="background:var(--warm-cream);border-radius:14px;padding:28px;border:1.5px solid var(--light-border)">
+      <h3 style="font-family:'Lora',serif;font-size:1.1rem;margin-bottom:8px">Become a Sponsor</h3>
+      <p style="font-size:0.88rem;color:var(--mid-gray);line-height:1.6;margin-bottom:16px">Platinum sponsors are featured with a logo, website link, and description on SAMHIN's website. All contributions directly support free mental health resources for the South Asian community.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a href="donate.html" class="btn-primary">Donate Now</a>
+        <a href="mailto:info@samhin.org?subject=Sponsorship Inquiry" class="btn-outline">Sponsorship Inquiry</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="tab-content" id="tab-contact">
+    <div class="section-label">Get in Touch</div>
+    <div class="section-title" style="margin-bottom:6px">Contact SAMHIN</div>
+    <div class="contact-grid" style="margin-bottom:32px">
+      <div class="contact-card">
+        <h3>📞 SAMHIN Helpline</h3>
+        <div class="contact-info-row"><span class="icon">📞</span><div><a href="tel:7329022561" style="font-weight:700;color:var(--charcoal);font-size:1.1rem;text-decoration:none">732-902-2561</a><div style="font-size:0.78rem;color:var(--mid-gray);margin-top:2px">10:00 AM – 7:00 PM EST, Monday – Friday</div></div></div>
+        <div class="contact-info-row"><span class="icon">📧</span><a href="mailto:info@samhin.org" style="color:var(--deep-teal)">info@samhin.org</a></div>
+      </div>
+      <div class="contact-card">
+        <h3>💬 Send a Message</h3>
+        <div class="form-group"><label class="form-label">Your Name</label><input class="form-input" type="text" placeholder="Your name"></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="your@email.com"></div>
+        <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" placeholder="How can we help?" style="min-height:80px"></textarea></div>
+        <button class="btn-primary" style="width:100%" onclick="alert('Message sent! We will respond within 2 business days.')">Send Message</button>
+      </div>
+    </div>
+    <div style="background:white;border-radius:14px;padding:24px;border:1.5px solid var(--light-border)">
+      <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:14px">🌐 Follow SAMHIN</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a href="https://facebook.com/SAMHINorg" target="_blank" class="btn-outline" style="font-size:0.82rem">Facebook</a>
+        <a href="https://twitter.com/SAMHINorg" target="_blank" class="btn-outline" style="font-size:0.82rem">X (Twitter)</a>
+        <a href="https://instagram.com/samhinorg" target="_blank" class="btn-outline" style="font-size:0.82rem">Instagram</a>
+        <a href="https://linkedin.com/company/south-asian-mental-health-initiative-and-network" target="_blank" class="btn-outline" style="font-size:0.82rem">LinkedIn</a>
+        <a href="https://youtube.com/channel/UCJhWCc_txVgQxXwfXseZGZw" target="_blank" class="btn-outline" style="font-size:0.82rem">YouTube</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM MODAL -->
+<div class="modal-overlay" id="team-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('team-modal').classList.remove('open')">✕</button>
+    <div class="modal-header">
+      <div class="modal-avatar" id="tm-avatar">VM</div>
+      <div><h2 style="font-family:'Lora',serif;font-size:1.3rem;color:var(--charcoal)" id="tm-name"></h2><div style="color:var(--mid-gray);font-size:0.85rem;margin-top:4px" id="tm-title"></div></div>
+    </div>
+    <p style="font-size:0.9rem;color:var(--charcoal);line-height:1.8" id="tm-bio"></p>
+  </div>
+</div>
+
+<div class="donate-strip" id="donate-banner"></div>
+<footer id="main-footer"></footer>
+<script src="shared.js"></script>
+<script>
+  injectTopBar(); injectNav('about.html'); injectFooter(); injectDonateBanner();
+
+  function switchTab(tab, el) {
+    document.querySelectorAll('.about-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+  }
+  function openTeamModal(name, title, initials, bio) {
+    document.getElementById('tm-name').textContent = name;
+    document.getElementById('tm-title').textContent = title;
+    document.getElementById('tm-avatar').textContent = initials;
+    document.getElementById('tm-bio').textContent = bio;
+    document.getElementById('team-modal').classList.add('open');
+  }
+  document.getElementById('team-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+</script>
+</body>
+</html>

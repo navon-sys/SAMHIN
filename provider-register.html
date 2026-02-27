@@ -1,0 +1,301 @@
+/**
+ * Project: SAMHIN First Draft
+ * Author: Vishavdeep Sharma
+ * Company: Navonsys Inc
+ * Date: 2026-02-26
+ * Description: Provides a multi-step registration form for mental health providers to join the network.
+ */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Provider Registration – SAMHIN</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.reg-layout { display: grid; grid-template-columns: 1fr 360px; gap: 32px; align-items: start; }
+.reg-card { background: white; border-radius: 16px; border: 1.5px solid var(--light-border); padding: 36px; }
+.steps { display: flex; gap: 0; margin-bottom: 36px; }
+.step { flex: 1; text-align: center; position: relative; }
+.step::after { content:''; position: absolute; top: 18px; left: 50%; width: 100%; height: 2px; background: var(--light-border); z-index: 0; }
+.step:last-child::after { display: none; }
+.step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--light-border); color: var(--mid-gray); font-weight: 700; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; position: relative; z-index: 1; }
+.step.active .step-num { background: var(--deep-teal); color: white; }
+.step.done .step-num { background: #22C55E; color: white; }
+.step-label { font-size: 0.73rem; color: var(--mid-gray); font-weight: 500; }
+.step.active .step-label { color: var(--deep-teal); font-weight: 600; }
+.sidebar-info { background: white; border-radius: 16px; border: 1.5px solid var(--light-border); padding: 28px; position: sticky; top: 80px; }
+.sidebar-info h3 { font-family: 'Lora', serif; font-size: 1.1rem; margin-bottom: 16px; }
+.benefit-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; font-size: 0.85rem; }
+.benefit-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.upload-area { border: 2px dashed var(--light-border); border-radius: 10px; padding: 32px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+.upload-area:hover { border-color: var(--deep-teal); }
+.upload-area h4 { font-size: 0.9rem; margin-bottom: 6px; }
+.upload-area p { font-size: 0.78rem; color: var(--mid-gray); }
+.checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.success-msg { background: #DCFCE7; border: 1.5px solid #22C55E; border-radius: 10px; padding: 20px; display: none; }
+.success-msg h3 { color: #15803D; margin-bottom: 6px; }
+.success-msg p { font-size: 0.85rem; color: #166534; }
+@media(max-width:900px) { .reg-layout { grid-template-columns: 1fr; } .sidebar-info { position: static; } }
+</style>
+</head>
+<body>
+<div class="top-bar" id="top-bar"></div>
+<nav id="main-nav"></nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> › <a href="provider-directory.html">Provider Directory</a> › Register</div>
+    <h1>Provider Registration</h1>
+    <p>Join SAMHIN's free directory and connect with South Asian patients who need culturally aware mental health care.</p>
+  </div>
+</div>
+
+<section class="section section-cream">
+  <div class="reg-layout">
+    <div class="reg-card">
+      <!-- STEPS -->
+      <div class="steps">
+        <div class="step done"><div class="step-num">✓</div><div class="step-label">Account</div></div>
+        <div class="step active"><div class="step-num">2</div><div class="step-label">Profile</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-label">Credentials</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-label">Review</div></div>
+      </div>
+
+      <div id="success-msg" class="success-msg">
+        <h3>✅ Registration Submitted!</h3>
+        <p>Thank you for submitting your profile. Our team will review your information and publish it within 2–3 business days. You'll receive a confirmation email at the address you provided.</p>
+      </div>
+
+      <form id="reg-form" onsubmit="submitForm(event)">
+        <h2 style="font-family:'Lora',serif;font-size:1.3rem;margin-bottom:24px">Profile Information</h2>
+
+        <!-- Photo Upload -->
+        <div class="form-group">
+          <label class="form-label">Profile Photo <span class="req">*</span></label>
+          <div class="upload-area" onclick="document.getElementById('photo-input').click()">
+            <div id="photo-preview" style="font-size:2.5rem;margin-bottom:8px">📷</div>
+            <h4>Upload Your Photo</h4>
+            <p>JPG or PNG · Square recommended · Max 5MB</p>
+            <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+          </div>
+          <div class="form-error" id="photo-err">Please upload a profile photo.</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name <span class="req">*</span></label>
+            <input class="form-input" id="fname" type="text" placeholder="First name">
+            <div class="form-error" id="fname-err">First name is required.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name <span class="req">*</span></label>
+            <input class="form-input" id="lname" type="text" placeholder="Last name">
+            <div class="form-error" id="lname-err">Last name is required.</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Credentials / Degrees <span class="req">*</span></label>
+          <input class="form-input" id="creds" type="text" placeholder="e.g. MD, PhD, LCSW, LPC, LMFT">
+          <div class="form-error" id="creds-err">Please enter your credentials.</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email Address <span class="req">*</span></label>
+            <input class="form-input" id="email" type="email" placeholder="your@email.com">
+            <div class="form-hint">
+              <input type="checkbox" id="show-email" style="accent-color:var(--deep-teal)">
+              <label for="show-email" style="font-size:0.76rem;color:var(--mid-gray);margin-left:4px">Display email on public profile</label>
+            </div>
+            <div class="form-error" id="email-err">Please enter a valid email address.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number <span class="req">*</span></label>
+            <input class="form-input" id="phone" type="tel" placeholder="(XXX) XXX-XXXX" oninput="formatPhone(this)">
+            <div class="form-error" id="phone-err">Please enter a valid phone number.</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">City <span class="req">*</span></label>
+            <input class="form-input" id="city" type="text" placeholder="City">
+            <div class="form-error" id="city-err">City is required.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">State <span class="req">*</span></label>
+            <select class="form-select" id="state">
+              <option value="">Select State</option>
+              <option>NJ</option><option>NY</option><option>CA</option><option>TX</option><option>FL</option><option>PA</option><option>IL</option><option>MA</option><option>GA</option><option>WA</option><option>Other</option>
+            </select>
+            <div class="form-error" id="state-err">Please select a state.</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ZIP Code <span class="req">*</span></label>
+          <input class="form-input" id="zip" type="text" placeholder="XXXXX" maxlength="10">
+          <div class="form-error" id="zip-err">Please enter a valid ZIP code.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Licensing States <span class="req">*</span></label>
+          <div class="checkbox-grid" style="margin-top:8px">
+            <label class="filter-check"><input type="checkbox" value="NJ"> New Jersey</label>
+            <label class="filter-check"><input type="checkbox" value="NY"> New York</label>
+            <label class="filter-check"><input type="checkbox" value="CA"> California</label>
+            <label class="filter-check"><input type="checkbox" value="TX"> Texas</label>
+            <label class="filter-check"><input type="checkbox" value="FL"> Florida</label>
+            <label class="filter-check"><input type="checkbox" value="PA"> Pennsylvania</label>
+            <label class="filter-check"><input type="checkbox" value="IL"> Illinois</label>
+            <label class="filter-check"><input type="checkbox" value="MA"> Massachusetts</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Specialties <span class="req">*</span></label>
+          <div class="checkbox-grid" style="margin-top:8px">
+            <label class="filter-check"><input type="checkbox"> Anxiety</label>
+            <label class="filter-check"><input type="checkbox"> Depression</label>
+            <label class="filter-check"><input type="checkbox"> Trauma & PTSD</label>
+            <label class="filter-check"><input type="checkbox"> Addiction</label>
+            <label class="filter-check"><input type="checkbox"> Relationship Issues</label>
+            <label class="filter-check"><input type="checkbox"> Grief & Loss</label>
+            <label class="filter-check"><input type="checkbox"> Child & Adolescent</label>
+            <label class="filter-check"><input type="checkbox"> Eating Disorders</label>
+            <label class="filter-check"><input type="checkbox"> Couples Therapy</label>
+            <label class="filter-check"><input type="checkbox"> Anger Management</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Languages Spoken</label>
+          <div class="checkbox-grid" style="margin-top:8px">
+            <label class="filter-check"><input type="checkbox" checked> English</label>
+            <label class="filter-check"><input type="checkbox"> Hindi</label>
+            <label class="filter-check"><input type="checkbox"> Punjabi</label>
+            <label class="filter-check"><input type="checkbox"> Bengali</label>
+            <label class="filter-check"><input type="checkbox"> Urdu</label>
+            <label class="filter-check"><input type="checkbox"> Gujarati</label>
+            <label class="filter-check"><input type="checkbox"> Tamil</label>
+            <label class="filter-check"><input type="checkbox"> Telugu</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Session Format</label>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px">
+            <label class="filter-check"><input type="checkbox"> In Person</label>
+            <label class="filter-check"><input type="checkbox" checked> Telehealth</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Accepted Insurance</label>
+          <input class="form-input" id="insurance" type="text" placeholder="e.g. Aetna, BCBS, Cigna, Self-Pay">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Bio / Profile Statement <span class="req">*</span></label>
+          <textarea class="form-textarea" id="bio" placeholder="Tell potential clients about yourself — your approach, background, and why you work with South Asian communities. (150–500 words recommended)"></textarea>
+          <div class="form-hint">This will be displayed on your public profile.</div>
+          <div class="form-error" id="bio-err">Please write a short bio.</div>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="agree-terms">
+            <label for="agree-terms">I agree to SAMHIN's <a href="#" style="color:var(--deep-teal)">Terms of Service</a> and confirm that all information provided is accurate. I understand that my profile will be reviewed before publishing.</label>
+          </div>
+          <div class="form-error" id="terms-err">You must agree to the terms to continue.</div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <button type="button" class="btn-outline">← Back</button>
+          <button type="submit" class="btn-primary">Submit Profile →</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar-info">
+      <h3>Why List on SAMHIN?</h3>
+      <div class="benefit-item"><span class="benefit-icon">🆓</span><div><strong>Always Free</strong><br><span style="color:var(--mid-gray);font-size:0.8rem">SAMHIN has offered free listings for over 11 years and remains committed to this.</span></div></div>
+      <div class="benefit-item"><span class="benefit-icon">🌏</span><div><strong>Reach South Asian Clients</strong><br><span style="color:var(--mid-gray);font-size:0.8rem">Connect with clients who specifically seek culturally aware providers.</span></div></div>
+      <div class="benefit-item"><span class="benefit-icon">✅</span><div><strong>Reviewed Before Publishing</strong><br><span style="color:var(--mid-gray);font-size:0.8rem">All profiles are reviewed within 2–3 business days to ensure quality.</span></div></div>
+      <div class="benefit-item"><span class="benefit-icon">✏️</span><div><strong>Self-Service Updates</strong><br><span style="color:var(--mid-gray);font-size:0.8rem">Coming soon: edit your profile with a username and password.</span></div></div>
+      <hr style="border:none;border-top:1px solid var(--light-border);margin:20px 0">
+      <p style="font-size:0.82rem;color:var(--mid-gray);line-height:1.6">Questions? Email us at <a href="mailto:info@samhin.org" style="color:var(--deep-teal)">info@samhin.org</a> or call <a href="tel:7329022561" style="color:var(--deep-teal)">732-902-2561</a>.</p>
+    </div>
+  </div>
+</section>
+
+<footer id="main-footer"></footer>
+<script src="shared.js"></script>
+<script>
+  injectTopBar(); injectNav('provider-directory.html'); injectFooter();
+
+  function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const preview = document.getElementById('photo-preview');
+        preview.innerHTML = `<img src="${e.target.result}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;display:block">`;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function submitForm(e) {
+    e.preventDefault();
+    let valid = true;
+    const fields = [
+      {id:'fname', err:'fname-err'}, {id:'lname', err:'lname-err'},
+      {id:'creds', err:'creds-err'}, {id:'city', err:'city-err'}, {id:'bio', err:'bio-err'}
+    ];
+    fields.forEach(f => { if (!validateField(document.getElementById(f.id), f.err)) valid = false; });
+
+    const email = document.getElementById('email');
+    if (!validateEmail(email)) {
+      email.classList.add('error');
+      document.getElementById('email-err').style.display = 'block';
+      valid = false;
+    } else { email.classList.remove('error'); document.getElementById('email-err').style.display = 'none'; }
+
+    const phone = document.getElementById('phone');
+    if (phone.value.replace(/\D/g,'').length < 10) {
+      phone.classList.add('error');
+      document.getElementById('phone-err').style.display = 'block';
+      valid = false;
+    } else { phone.classList.remove('error'); document.getElementById('phone-err').style.display = 'none'; }
+
+    if (!validateZip(document.getElementById('zip'))) {
+      document.getElementById('zip').classList.add('error');
+      document.getElementById('zip-err').style.display = 'block';
+      valid = false;
+    } else { document.getElementById('zip').classList.remove('error'); document.getElementById('zip-err').style.display = 'none'; }
+
+    const state = document.getElementById('state');
+    if (!state.value) {
+      state.classList.add('error');
+      document.getElementById('state-err').style.display = 'block';
+      valid = false;
+    } else { state.classList.remove('error'); document.getElementById('state-err').style.display = 'none'; }
+
+    if (!document.getElementById('agree-terms').checked) {
+      document.getElementById('terms-err').style.display = 'block';
+      valid = false;
+    } else { document.getElementById('terms-err').style.display = 'none'; }
+
+    if (valid) {
+      document.getElementById('reg-form').style.display = 'none';
+      document.getElementById('success-msg').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      document.querySelector('.form-input.error, .form-select.error, .form-textarea.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+</script>
+</body>
+</html>

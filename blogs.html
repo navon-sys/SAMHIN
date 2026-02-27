@@ -1,0 +1,284 @@
+/**
+ * Project: SAMHIN First Draft
+ * Author: Vishavdeep Sharma
+ * Company: Navonsys Inc
+ * Date: 2026-02-26
+ * Description: Features community blog posts, testimonials, and a submission form for user stories.
+ */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blogs & Testimonials – SAMHIN</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.blogs-layout { display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: start; }
+.blog-main-card { background: white; border-radius: 16px; overflow: hidden; border: 1.5px solid var(--light-border); margin-bottom: 24px; }
+.blog-main-img { height: 260px; background: linear-gradient(135deg, var(--deep-teal), #1e5a3a); display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+.blog-main-body { padding: 28px; }
+.blog-main-body .cat { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--saffron); margin-bottom: 10px; }
+.blog-main-body h2 { font-family: 'Lora', serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; line-height: 1.3; }
+.blog-main-body p { font-size: 0.9rem; color: var(--mid-gray); line-height: 1.7; margin-bottom: 16px; }
+.blog-author { display: flex; align-items: center; gap: 10px; }
+.author-pic { width: 38px; height: 38px; border-radius: 50%; background: var(--deep-teal); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.85rem; }
+.blog-grid-sm { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.blog-card-sm { background: white; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--light-border); transition: box-shadow 0.2s; cursor: pointer; }
+.blog-card-sm:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.blog-card-sm-img { height: 130px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+.blog-card-sm-body { padding: 14px; }
+.blog-card-sm-body .cat { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--saffron); margin-bottom: 5px; }
+.blog-card-sm-body h3 { font-size: 0.9rem; font-weight: 600; line-height: 1.4; margin-bottom: 5px; }
+.blog-card-sm-body p { font-size: 0.76rem; color: var(--mid-gray); line-height: 1.5; }
+.blog-meta-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-top: 1px solid var(--light-border); font-size: 0.72rem; color: var(--mid-gray); }
+/* SIDEBAR */
+.sidebar-widget { background: white; border-radius: 14px; border: 1.5px solid var(--light-border); padding: 22px; margin-bottom: 20px; }
+.sidebar-widget h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 14px; }
+.category-list { list-style: none; }
+.category-list li { border-bottom: 1px solid var(--light-border); }
+.category-list li:last-child { border-bottom: none; }
+.category-list li a { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 0.85rem; text-decoration: none; color: var(--charcoal); transition: color 0.2s; }
+.category-list li a:hover { color: var(--deep-teal); }
+.category-list li a .count { background: var(--warm-cream); color: var(--mid-gray); border-radius: 20px; padding: 2px 8px; font-size: 0.72rem; font-weight: 600; }
+.signup-widget { background: linear-gradient(135deg, #0d4a4d, #1A6B6E); border-radius: 14px; padding: 24px; color: white; margin-bottom: 20px; }
+.signup-widget h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+.signup-widget p { font-size: 0.82rem; opacity: 0.8; margin-bottom: 14px; line-height: 1.5; }
+.signup-widget input { width: 100%; border: none; border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; margin-bottom: 10px; font-family: 'DM Sans', sans-serif; }
+/* TESTIMONIALS SECTION */
+.testimonials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.testimonial-card { background: white; border-radius: 14px; border: 1.5px solid var(--light-border); padding: 24px; }
+.quote { font-family: 'Lora', serif; font-size: 2.5rem; color: var(--soft-gold); line-height: 1; margin-bottom: 8px; }
+.testimonial-card blockquote { font-size: 0.9rem; color: var(--charcoal); line-height: 1.7; font-style: italic; margin-bottom: 16px; }
+.testimonial-author { display: flex; align-items: center; gap: 10px; }
+.t-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--deep-teal); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.85rem; }
+.t-name { font-weight: 600; font-size: 0.88rem; }
+.t-role { font-size: 0.75rem; color: var(--mid-gray); }
+.share-cta-banner { background: var(--warm-cream); border: 2px dashed var(--light-border); border-radius: 14px; padding: 36px; text-align: center; margin-top: 24px; }
+.share-cta-banner h3 { font-family: 'Lora', serif; font-size: 1.3rem; margin-bottom: 8px; }
+.share-cta-banner p { color: var(--mid-gray); font-size: 0.88rem; max-width: 500px; margin: 0 auto 20px; line-height: 1.6; }
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.filter-chip { background: white; border: 1.5px solid var(--light-border); color: var(--mid-gray); padding: 7px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.filter-chip:hover, .filter-chip.active { background: var(--deep-teal); border-color: var(--deep-teal); color: white; }
+@media(max-width:900px) { .blogs-layout { grid-template-columns: 1fr; } .blog-grid-sm { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="top-bar" id="top-bar"></div>
+<nav id="main-nav"></nav>
+<div class="crisis-banner" id="crisis-banner"></div>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> › Blogs & Testimonials</div>
+    <h1>Blogs & Personal Stories</h1>
+    <p>Articles, lived experiences, cultural perspectives, and expert insights on South Asian mental health.</p>
+  </div>
+</div>
+
+<!-- BLOGS -->
+<section class="section section-cream">
+  <div class="filter-bar">
+    <span class="filter-chip active" onclick="setFilter(this)">All</span>
+    <span class="filter-chip" onclick="setFilter(this)">Mental Health & Culture</span>
+    <span class="filter-chip" onclick="setFilter(this)">Personal Stories</span>
+    <span class="filter-chip" onclick="setFilter(this)">Ask the Expert</span>
+    <span class="filter-chip" onclick="setFilter(this)">Resources & FAQs</span>
+    <span class="filter-chip" onclick="setFilter(this)">Podcasts & Videos</span>
+  </div>
+  <div class="blogs-layout">
+    <div>
+      <!-- FEATURED -->
+      <div class="blog-main-card">
+        <div class="blog-main-img">🧠</div>
+        <div class="blog-main-body">
+          <div class="cat">Featured · Mental Health & Culture</div>
+          <h2>When Therapy Feels Like Betrayal: Navigating Family Loyalty in South Asian Communities</h2>
+          <p>For many South Asians, the act of seeking professional mental health support carries an unexpected weight — the feeling that you are exposing your family's private struggles to a stranger, and somehow betraying those you love most. This piece explores why that feeling exists, where it comes from, and how to begin reframing it.</p>
+          <div class="blog-author">
+            <div class="author-pic">PS</div>
+            <div>
+              <div style="font-weight:600;font-size:0.88rem">Dr. Priya Sharma</div>
+              <div style="font-size:0.75rem;color:var(--mid-gray)">Psychiatrist · Feb 12, 2026 · 8 min read</div>
+            </div>
+            <a href="#" class="btn-outline" style="margin-left:auto;font-size:0.82rem;padding:8px 16px">Read Article</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRID -->
+      <div class="section-label" style="margin-bottom:12px">Latest Articles</div>
+      <div class="blog-grid-sm">
+        <div class="blog-card-sm">
+          <div class="blog-card-sm-img" style="background:linear-gradient(135deg,#7C3AED,#C084FC)">💬</div>
+          <div class="blog-card-sm-body">
+            <div class="cat">Personal Stories</div>
+            <h3>"Getting Help Was the Bravest Thing I Ever Did"</h3>
+            <p>Anita shares her journey through anxiety, cultural pressure, and finding the courage to reach out.</p>
+          </div>
+          <div class="blog-meta-row"><span>Anita R.</span><span>Jan 28, 2026</span></div>
+        </div>
+        <div class="blog-card-sm">
+          <div class="blog-card-sm-img" style="background:linear-gradient(135deg,var(--saffron),var(--soft-gold))">📚</div>
+          <div class="blog-card-sm-body">
+            <div class="cat">Resources & FAQs</div>
+            <h3>Understanding Depression: A Guide for South Asian Families</h3>
+            <p>What depression looks like in our communities — and how to talk about it.</p>
+          </div>
+          <div class="blog-meta-row"><span>SAMHIN Team</span><span>Jan 15, 2026</span></div>
+        </div>
+        <div class="blog-card-sm">
+          <div class="blog-card-sm-img" style="background:linear-gradient(135deg,#059669,#34D399)">🎙️</div>
+          <div class="blog-card-sm-body">
+            <div class="cat">Ask the Expert</div>
+            <h3>Q: My son won't talk about his feelings. What can I do?</h3>
+            <p>Dr. Kapoor answers a question from a SAMHIN community member about teenage boys and emotional expression.</p>
+          </div>
+          <div class="blog-meta-row"><span>Dr. A. Kapoor</span><span>Jan 5, 2026</span></div>
+        </div>
+        <div class="blog-card-sm">
+          <div class="blog-card-sm-img" style="background:linear-gradient(135deg,#0369A1,#7DD3FC)">🎧</div>
+          <div class="blog-card-sm-body">
+            <div class="cat">Podcasts & Videos</div>
+            <h3>Listen: Shame, Silence, and South Asian Mental Health (Podcast Ep. 12)</h3>
+            <p>A 35-minute conversation on the cultural roots of stigma and what it takes to break them.</p>
+          </div>
+          <div class="blog-meta-row"><span>SAMHIN Podcast</span><span>Dec 20, 2025</span></div>
+        </div>
+        <div class="blog-card-sm">
+          <div class="blog-card-sm-img" style="background:linear-gradient(135deg,#BE185D,#F9A8D4)">💔</div>
+          <div class="blog-card-sm-body">
+            <div class="cat">Mental Health & Culture</div>
+            <h3>Gray Divorce in the South Asian Community: What No One Talks About</h3>
+            <p>The unique emotional, financial, and social challenges of divorce later in life for South Asians.</p>
+          </div>
+          <div class="blog-meta-row"><span>Sunita R.</span><span>Dec 10, 2025</span></div>
+        </div>
+        <div class="blog-card-sm">
+          <div class="blog-card-sm-img" style="background:linear-gradient(135deg,#92400E,#D97706)">🧘</div>
+          <div class="blog-card-sm-body">
+            <div class="cat">Resources & FAQs</div>
+            <h3>5 Mindfulness Practices Rooted in South Asian Traditions</h3>
+            <p>Ancient wisdom meets modern mental health — practices you can start today.</p>
+          </div>
+          <div class="blog-meta-row"><span>SAMHIN Team</span><span>Nov 30, 2025</span></div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:28px">
+        <button class="btn-outline" onclick="alert('Loading more articles…')">Load More Articles</button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div>
+      <div class="signup-widget">
+        <h3>📧 Get Blog Updates</h3>
+        <p>New articles, expert advice, and community stories — delivered to your inbox. Simple sign-up, no spam.</p>
+        <input type="email" placeholder="your@email.com">
+        <button class="btn-white" style="width:100%;text-align:center" onclick="alert('Thank you! You are now subscribed to SAMHIN blog updates.')">Subscribe Free</button>
+      </div>
+      <div class="sidebar-widget">
+        <h3>📂 Blog Topics</h3>
+        <ul class="category-list">
+          <li><a href="#">Mental Health & Culture <span class="count">24</span></a></li>
+          <li><a href="#">Personal Stories <span class="count">18</span></a></li>
+          <li><a href="#">Ask the Expert <span class="count">12</span></a></li>
+          <li><a href="#">Resources & FAQs <span class="count">15</span></a></li>
+          <li><a href="#">Podcasts & Videos <span class="count">9</span></a></li>
+          <li><a href="#">Substance Use & Recovery <span class="count">7</span></a></li>
+          <li><a href="#">Grief & Loss <span class="count">6</span></a></li>
+          <li><a href="#">Youth & Adolescents <span class="count">8</span></a></li>
+        </ul>
+      </div>
+      <div class="sidebar-widget">
+        <h3>🔥 Most Read</h3>
+        <div style="font-size:0.83rem;display:flex;flex-direction:column;gap:12px">
+          <a href="#" style="text-decoration:none;color:var(--charcoal);padding-bottom:12px;border-bottom:1px solid var(--light-border)">When Therapy Feels Like Betrayal →</a>
+          <a href="#" style="text-decoration:none;color:var(--charcoal);padding-bottom:12px;border-bottom:1px solid var(--light-border)">Understanding Depression: A Guide for South Asian Families →</a>
+          <a href="#" style="text-decoration:none;color:var(--charcoal)">Q: My son won't talk about his feelings →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section section-white">
+  <div class="section-label">Community Voices</div>
+  <div class="section-title">Real Stories. Real Healing.</div>
+  <div class="section-sub">These testimonials help reduce stigma and inspire others to seek support. Names are used with permission.</div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <div class="quote">"</div>
+      <blockquote>SAMHIN helped me find a therapist who truly understood my background. For the first time, I didn't have to explain why my family's expectations felt so heavy. That understanding made all the difference.</blockquote>
+      <div class="testimonial-author"><div class="t-avatar">RK</div><div><div class="t-name">Rohan K.</div><div class="t-role">Community member, NJ</div></div></div>
+    </div>
+    <div class="testimonial-card">
+      <div class="quote">"</div>
+      <blockquote>The AA meetings through SAMHIN gave me a safe space where others understood my culture, my family, and why recovery looks different for us. It changed my life and helped me reconnect with my children.</blockquote>
+      <div class="testimonial-author"><div class="t-avatar">SA</div><div><div class="t-name">Sunita A.</div><div class="t-role">Recovery journey, 3 years</div></div></div>
+    </div>
+    <div class="testimonial-card">
+      <div class="quote">"</div>
+      <blockquote>I was skeptical about joining the support group. I thought: what could strangers understand about what I'm going through? But from the first session, I felt seen. These are my people.</blockquote>
+      <div class="testimonial-author"><div class="t-avatar">MP</div><div><div class="t-name">Meena P.</div><div class="t-role">Support group member</div></div></div>
+    </div>
+    <div class="testimonial-card">
+      <div class="quote">"</div>
+      <blockquote>As a first-generation immigrant, I always thought asking for help was weakness. SAMHIN showed me it takes more courage to reach out than to stay silent. I wish I had found this community sooner.</blockquote>
+      <div class="testimonial-author"><div class="t-avatar">AJ</div><div><div class="t-name">Arjun J.</div><div class="t-role">New Jersey community member</div></div></div>
+    </div>
+    <div class="testimonial-card">
+      <div class="quote">"</div>
+      <blockquote>After losing my mother to suicide, I thought no one would understand. The Janani support group gave me space to grieve without explanation or judgment. It was the first place I felt I could breathe.</blockquote>
+      <div class="testimonial-author"><div class="t-avatar">NS</div><div><div class="t-name">Nisha S.</div><div class="t-role">Janani group member</div></div></div>
+    </div>
+    <div class="testimonial-card">
+      <div class="quote">"</div>
+      <blockquote>Volunteering with SAMHIN has given me purpose beyond my own healing. We're building something so important — a lifeline for a community that has been underserved for far too long.</blockquote>
+      <div class="testimonial-author"><div class="t-avatar">VP</div><div><div class="t-name">Vikram P.</div><div class="t-role">SAMHIN Volunteer, 2 years</div></div></div>
+    </div>
+  </div>
+
+  <!-- SHARE YOUR STORY CTA -->
+  <div class="share-cta-banner">
+    <h3>Would You Like to Share Your Story?</h3>
+    <p>Your experience could be the thing that helps someone else take their first step. SAMHIN will never publish your story without your explicit consent. All stories are reviewed by our team.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-primary" onclick="document.getElementById('share-form').style.display='block';this.style.display='none'">Share My Story</button>
+      <a href="mailto:info@samhin.org?subject=My SAMHIN Story" class="btn-outline">Email Us Your Story</a>
+    </div>
+    <div id="share-form" style="display:none;margin-top:24px;text-align:left;max-width:600px;margin-left:auto;margin-right:auto">
+      <div class="form-group">
+        <label class="form-label">Your Name (or Anonymous)</label>
+        <input class="form-input" type="text" placeholder="Name or 'Anonymous'">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Story <span class="req">*</span></label>
+        <textarea class="form-textarea" placeholder="Share your experience — in your own words, in your own time. There is no right or wrong way to tell your story." style="min-height:180px"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email (so we can follow up with you)</label>
+        <input class="form-input" type="email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="story-consent">
+          <label for="story-consent">I give SAMHIN permission to review and potentially publish my story on samhin.org (with my name or anonymously as indicated above).</label>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="alert('Thank you for sharing your story. Our team will review it and follow up with you within a week.')">Submit My Story</button>
+    </div>
+  </div>
+</section>
+
+<div class="donate-strip" id="donate-banner"></div>
+<footer id="main-footer"></footer>
+<script src="shared.js"></script>
+<script>
+  injectTopBar(); injectNav('blogs.html'); injectCrisisBanner(); injectFooter(); injectDonateBanner();
+  function setFilter(el) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

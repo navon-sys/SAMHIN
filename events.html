@@ -1,0 +1,307 @@
+/**
+ * Project: SAMHIN First Draft
+ * Author: Vishavdeep Sharma
+ * Company: Navonsys Inc
+ * Date: 2026-02-26
+ * Description: Provides an interactive event calendar and listings for webinars and workshops.
+ */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events – SAMHIN</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.events-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--light-border); margin-bottom: 32px; }
+.events-tab { padding: 14px 24px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; color: var(--mid-gray); transition: all 0.2s; }
+.events-tab.active { color: var(--deep-teal); border-bottom-color: var(--deep-teal); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+/* Calendar */
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.cal-nav { display: flex; gap: 10px; align-items: center; }
+.cal-nav button { background: white; border: 1.5px solid var(--light-border); border-radius: 8px; width: 36px; height: 36px; cursor: pointer; font-size: 1rem; }
+.cal-title { font-family: 'Lora', serif; font-size: 1.4rem; font-weight: 700; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--light-border); border: 1.5px solid var(--light-border); border-radius: 12px; overflow: hidden; }
+.cal-day-header { background: var(--deep-teal); color: white; text-align: center; padding: 10px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.5px; }
+.cal-day { background: white; min-height: 100px; padding: 8px; font-size: 0.8rem; }
+.cal-day.other-month { background: #faf8f5; color: #ccc; }
+.cal-day.today { background: #E0F2F3; }
+.cal-day .day-num { font-weight: 700; margin-bottom: 4px; font-size: 0.85rem; }
+.cal-event { background: var(--deep-teal); color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.68rem; margin-bottom: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-event.saffron { background: var(--saffron); }
+.cal-event.gold { background: #9A6E1A; }
+/* Event cards */
+.events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 20px; }
+.event-card { background: white; border-radius: 14px; border: 1.5px solid var(--light-border); overflow: hidden; transition: box-shadow 0.2s; }
+.event-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.1); }
+.event-header { background: var(--deep-teal); padding: 16px 20px; display: flex; gap: 14px; align-items: center; }
+.event-header.saffron { background: var(--saffron); }
+.event-header.purple { background: #7C3AED; }
+.event-date-block { text-align: center; }
+.event-date-block .date-d { font-family: 'Lora', serif; font-size: 2rem; font-weight: 700; color: white; line-height: 1; }
+.event-date-block .date-m { font-size: 0.72rem; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 1px; }
+.event-header-info { color: white; }
+.event-header-info .time { font-size: 0.8rem; opacity: 0.85; }
+.event-header-info .format { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; margin-top: 4px; }
+.event-body { padding: 18px; }
+.event-body h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+.event-body p { font-size: 0.83rem; color: var(--mid-gray); line-height: 1.6; margin-bottom: 14px; }
+.event-footer { padding: 12px 18px; border-top: 1px solid var(--light-border); display: flex; justify-content: space-between; align-items: center; }
+.event-footer .spots { font-size: 0.78rem; color: var(--mid-gray); }
+.past-event-card { background: white; border-radius: 12px; border: 1.5px solid var(--light-border); padding: 20px; display: flex; gap: 16px; margin-bottom: 14px; }
+.past-event-img { width: 100px; height: 80px; background: linear-gradient(135deg, var(--deep-teal), #1e5a3a); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0; }
+.past-event-info h3 { font-size: 0.97rem; font-weight: 600; margin-bottom: 5px; }
+.past-event-info p { font-size: 0.81rem; color: var(--mid-gray); line-height: 1.5; }
+.past-event-info .past-meta { font-size: 0.75rem; color: var(--mid-gray); margin-top: 8px; display: flex; gap: 14px; }
+</style>
+</head>
+<body>
+<div class="top-bar" id="top-bar"></div>
+<nav id="main-nav"></nav>
+<div class="crisis-banner" id="crisis-banner"></div>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> › Events</div>
+    <h1>Community Events</h1>
+    <p>Workshops, webinars, health fairs, and community gatherings. Join us — in person or virtually.</p>
+  </div>
+</div>
+
+<section class="section section-cream">
+  <div class="events-tabs">
+    <div class="events-tab active" onclick="switchTab('upcoming',this)">📅 Upcoming Events</div>
+    <div class="events-tab" onclick="switchTab('calendar',this)">🗓 Calendar View</div>
+    <div class="events-tab" onclick="switchTab('past',this)">📁 Past Events</div>
+  </div>
+
+  <!-- UPCOMING -->
+  <div class="tab-content active" id="tab-upcoming">
+    <div class="section-label">March – May 2026</div>
+    <div class="section-title" style="margin-bottom:6px">Upcoming Events</div>
+    <div class="section-sub">Register for free. All times are Eastern (EST).</div>
+    <div class="events-grid">
+      <div class="event-card">
+        <div class="event-header">
+          <div class="event-date-block"><div class="date-d">15</div><div class="date-m">March</div></div>
+          <div class="event-header-info">
+            <div style="font-weight:600;font-size:0.95rem">Breaking the Stigma Webinar</div>
+            <div class="time">6:00 PM – 8:00 PM EST</div>
+            <span class="format">Virtual</span>
+          </div>
+        </div>
+        <div class="event-body">
+          <h3>Breaking the Stigma: South Asian Mental Health Open Conversation</h3>
+          <p>A panel of mental health professionals and community voices discuss cultural barriers, intergenerational trauma, and paths to healing. Open to all.</p>
+        </div>
+        <div class="event-footer">
+          <span class="spots">🟢 Open registration</span>
+          <a href="#" class="btn-primary" style="font-size:0.82rem;padding:8px 16px" onclick="alert('Registration form opens here. Zoom link will be emailed.')">Register Free</a>
+        </div>
+      </div>
+
+      <div class="event-card">
+        <div class="event-header saffron">
+          <div class="event-date-block"><div class="date-d">22</div><div class="date-m">March</div></div>
+          <div class="event-header-info">
+            <div style="font-weight:600;font-size:0.95rem">Mental Health Screening Fair</div>
+            <div class="time">10:00 AM – 12:00 PM EST</div>
+            <span class="format">In Person · Edison, NJ</span>
+          </div>
+        </div>
+        <div class="event-body">
+          <h3>Mental Health Screening & Resource Fair – Edison NJ</h3>
+          <p>Free depression and anxiety screenings, information about local resources, and one-on-one conversations with SAMHIN volunteers and affiliated providers.</p>
+        </div>
+        <div class="event-footer">
+          <span class="spots">🟢 Walk-ins welcome</span>
+          <a href="#" class="btn-saffron" style="font-size:0.82rem;padding:8px 16px" onclick="alert('Directions: 100 Menlo Park Drive, Edison NJ 08817')">Get Directions</a>
+        </div>
+      </div>
+
+      <div class="event-card">
+        <div class="event-header">
+          <div class="event-date-block"><div class="date-d">05</div><div class="date-m">April</div></div>
+          <div class="event-header-info">
+            <div style="font-weight:600;font-size:0.95rem">South Asian AA – Virtual</div>
+            <div class="time">7:00 PM – 9:00 PM EST</div>
+            <span class="format">Virtual · Weekly</span>
+          </div>
+        </div>
+        <div class="event-body">
+          <h3>South Asian AA Meeting (Global Gratitude Group)</h3>
+          <p>Weekly virtual support meeting for South Asian individuals on the recovery path. All are welcome. Zoom link provided upon registration.</p>
+        </div>
+        <div class="event-footer">
+          <span class="spots">🟢 Open registration</span>
+          <a href="#" class="btn-primary" style="font-size:0.82rem;padding:8px 16px" onclick="alert('Zoom link will be sent to your email after registration.')">Register Free</a>
+        </div>
+      </div>
+
+      <div class="event-card">
+        <div class="event-header purple">
+          <div class="event-date-block"><div class="date-d">19</div><div class="date-m">April</div></div>
+          <div class="event-header-info">
+            <div style="font-weight:600;font-size:0.95rem">Workshop: Parenting & Mental Health</div>
+            <div class="time">2:00 PM – 4:00 PM EST</div>
+            <span class="format">Virtual</span>
+          </div>
+        </div>
+        <div class="event-body">
+          <h3>Raising Resilient Children: South Asian Parenting & Mental Health</h3>
+          <p>A workshop for South Asian parents on supporting children's mental health, navigating cultural pressure, and building open communication.</p>
+        </div>
+        <div class="event-footer">
+          <span class="spots">🟡 15 spots left</span>
+          <a href="#" class="btn-primary" style="font-size:0.82rem;padding:8px 16px" onclick="alert('Registration confirmation will be sent to your email.')">Register Free</a>
+        </div>
+      </div>
+
+      <div class="event-card">
+        <div class="event-header saffron">
+          <div class="event-date-block"><div class="date-d">10</div><div class="date-m">May</div></div>
+          <div class="event-header-info">
+            <div style="font-weight:600;font-size:0.95rem">Mental Health Awareness Month</div>
+            <div class="time">All Day</div>
+            <span class="format">In Person · Piscataway, NJ</span>
+          </div>
+        </div>
+        <div class="event-body">
+          <h3>SAMHIN Mental Health Awareness Month Community Day</h3>
+          <p>A full day of panels, wellness activities, provider meetups, and community connection to celebrate Mental Health Awareness Month.</p>
+        </div>
+        <div class="event-footer">
+          <span class="spots">🟢 Open registration</span>
+          <a href="#" class="btn-saffron" style="font-size:0.82rem;padding:8px 16px" onclick="alert('Registration opens April 1, 2026.')">Register Free</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="tab-content" id="tab-calendar">
+    <div class="cal-header">
+      <div class="cal-nav">
+        <button onclick="changeMonth(-1)">‹</button>
+        <span class="cal-title" id="cal-title">March 2026</span>
+        <button onclick="changeMonth(1)">›</button>
+      </div>
+      <div style="display:flex;gap:10px">
+        <input type="text" class="form-input" placeholder="🔍 Search events…" style="width:220px;padding:8px 12px;font-size:0.85rem">
+        <button class="btn-primary" style="padding:8px 16px;font-size:0.85rem">Find</button>
+      </div>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-day-header">Sun</div><div class="cal-day-header">Mon</div><div class="cal-day-header">Tue</div>
+      <div class="cal-day-header">Wed</div><div class="cal-day-header">Thu</div><div class="cal-day-header">Fri</div><div class="cal-day-header">Sat</div>
+      <!-- Week 1 -->
+      <div class="cal-day other-month"><div class="day-num">22</div></div>
+      <div class="cal-day other-month"><div class="day-num">23</div></div>
+      <div class="cal-day other-month"><div class="day-num">24</div></div>
+      <div class="cal-day other-month"><div class="day-num">25</div></div>
+      <div class="cal-day other-month"><div class="day-num">26</div></div>
+      <div class="cal-day other-month"><div class="day-num">27</div></div>
+      <div class="cal-day"><div class="day-num">1</div><div class="cal-event">AA Meeting 7PM</div></div>
+      <!-- Week 2 -->
+      <div class="cal-day"><div class="day-num">2</div></div>
+      <div class="cal-day"><div class="day-num">3</div></div>
+      <div class="cal-day"><div class="day-num">4</div></div>
+      <div class="cal-day"><div class="day-num">5</div></div>
+      <div class="cal-day"><div class="day-num">6</div></div>
+      <div class="cal-day"><div class="day-num">7</div></div>
+      <div class="cal-day"><div class="day-num">8</div><div class="cal-event">AA Meeting 7PM</div></div>
+      <!-- Week 3 -->
+      <div class="cal-day"><div class="day-num">9</div></div>
+      <div class="cal-day"><div class="day-num">10</div></div>
+      <div class="cal-day"><div class="day-num">11</div></div>
+      <div class="cal-day"><div class="day-num">12</div></div>
+      <div class="cal-day"><div class="day-num">13</div></div>
+      <div class="cal-day"><div class="day-num">14</div></div>
+      <div class="cal-day today"><div class="day-num">15</div><div class="cal-event">Stigma Webinar 6PM</div><div class="cal-event">AA Meeting 7PM</div></div>
+      <!-- Week 4 -->
+      <div class="cal-day"><div class="day-num">16</div></div>
+      <div class="cal-day"><div class="day-num">17</div></div>
+      <div class="cal-day"><div class="day-num">18</div></div>
+      <div class="cal-day"><div class="day-num">19</div></div>
+      <div class="cal-day"><div class="day-num">20</div></div>
+      <div class="cal-day"><div class="day-num">21</div></div>
+      <div class="cal-day"><div class="day-num">22</div><div class="cal-event saffron">Health Fair 10AM</div><div class="cal-event">AA Meeting 7PM</div></div>
+      <!-- Week 5 -->
+      <div class="cal-day"><div class="day-num">23</div></div>
+      <div class="cal-day"><div class="day-num">24</div></div>
+      <div class="cal-day"><div class="day-num">25</div></div>
+      <div class="cal-day"><div class="day-num">26</div></div>
+      <div class="cal-day"><div class="day-num">27</div></div>
+      <div class="cal-day"><div class="day-num">28</div></div>
+      <div class="cal-day"><div class="day-num">29</div><div class="cal-event">AA Meeting 7PM</div></div>
+      <!-- Week 6 -->
+      <div class="cal-day"><div class="day-num">30</div></div>
+      <div class="cal-day"><div class="day-num">31</div></div>
+      <div class="cal-day other-month"><div class="day-num">1</div></div>
+      <div class="cal-day other-month"><div class="day-num">2</div></div>
+      <div class="cal-day other-month"><div class="day-num">3</div></div>
+      <div class="cal-day other-month"><div class="day-num">4</div></div>
+      <div class="cal-day other-month"><div class="day-num">5</div></div>
+    </div>
+  </div>
+
+  <!-- PAST -->
+  <div class="tab-content" id="tab-past">
+    <div class="section-label">Archive</div>
+    <div class="section-title" style="margin-bottom:6px">Past Events</div>
+    <div class="section-sub">Recaps, photos, and highlights from previous SAMHIN events.</div>
+    <div class="past-event-card">
+      <div class="past-event-img">🎤</div>
+      <div class="past-event-info">
+        <h3>World Mental Health Day Symposium 2025</h3>
+        <p>A landmark gathering of 200+ South Asian community members, providers, and advocates. Featured keynote speakers, breakout sessions, and a community resource fair.</p>
+        <div class="past-meta"><span>📅 October 10, 2025</span><span>📍 Edison, NJ</span><span>👥 200+ attendees</span></div>
+        <a href="#" class="view-all-link" style="font-size:0.8rem" onclick="alert('Photo gallery — feature coming soon. Images are protected from download.')">View Photos & Recap →</a>
+      </div>
+    </div>
+    <div class="past-event-card">
+      <div class="past-event-img" style="background:linear-gradient(135deg,var(--saffron),var(--soft-gold))">🏥</div>
+      <div class="past-event-info">
+        <h3>Annual Health Fair – Piscataway NJ 2025</h3>
+        <p>Free health screenings, mental health resources, provider meetups, and wellness activities for the South Asian community.</p>
+        <div class="past-meta"><span>📅 June 8, 2025</span><span>📍 Piscataway, NJ</span><span>👥 150+ attendees</span></div>
+        <a href="#" class="view-all-link" style="font-size:0.8rem" onclick="alert('Photo gallery — feature coming soon.')">View Photos & Recap →</a>
+      </div>
+    </div>
+    <div class="past-event-card">
+      <div class="past-event-img" style="background:linear-gradient(135deg,#7C3AED,#C084FC)">💻</div>
+      <div class="past-event-info">
+        <h3>Webinar: Navigating Depression in South Asian Families 2025</h3>
+        <p>A practical webinar featuring Dr. Makhija and SAMHIN providers on recognizing and addressing depression in culturally specific contexts.</p>
+        <div class="past-meta"><span>📅 March 15, 2025</span><span>💻 Virtual</span><span>👥 320 registered</span></div>
+        <a href="#" class="view-all-link" style="font-size:0.8rem" onclick="alert('Recording available upon request — email info@samhin.org')">Watch Recording →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="donate-strip" id="donate-banner"></div>
+<footer id="main-footer"></footer>
+<script src="shared.js"></script>
+<script>
+  injectTopBar(); injectNav('events.html'); injectCrisisBanner(); injectFooter(); injectDonateBanner();
+
+  function switchTab(tab, el) {
+    document.querySelectorAll('.events-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+  }
+
+  let currentMonth = 2; // March = 2 (0-indexed)
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function changeMonth(dir) {
+    currentMonth += dir;
+    if (currentMonth < 0) currentMonth = 11;
+    if (currentMonth > 11) currentMonth = 0;
+    document.getElementById('cal-title').textContent = months[currentMonth] + ' 2026';
+  }
+</script>
+</body>
+</html>

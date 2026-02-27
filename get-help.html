@@ -1,0 +1,239 @@
+/**
+ * Project: SAMHIN First Draft
+ * Author: Vishavdeep Sharma
+ * Company: Navonsys Inc
+ * Date: 2026-02-26
+ * Description: Centralizes mental health resources, FAQs, and support pathways for the community.
+ */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get Help – SAMHIN</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.help-pathways { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 0; }
+.pathway-card { background: white; border-radius: 16px; padding: 32px 24px; text-align: center; border: 2px solid var(--light-border); text-decoration: none; color: var(--charcoal); transition: all 0.25s; }
+.pathway-card:hover { border-color: var(--deep-teal); transform: translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+.pathway-icon { width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 16px; }
+.pathway-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+.pathway-card p { font-size: 0.82rem; color: var(--mid-gray); line-height: 1.5; }
+.hotline-card { background: white; border-radius: 16px; padding: 28px; border-left: 5px solid var(--saffron); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.hotline-card.teal { border-left-color: var(--deep-teal); }
+.hotline-card.red { border-left-color: var(--alert-red); }
+.hotline-number { font-family: 'Lora', serif; font-size: 1.8rem; font-weight: 700; color: var(--charcoal); }
+.hotline-label { font-size: 0.8rem; color: var(--mid-gray); margin-top: 4px; }
+.hotline-desc { font-size: 0.88rem; color: var(--mid-gray); max-width: 400px; line-height: 1.6; }
+.groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.group-card { background: white; border-radius: 14px; padding: 24px; border: 1.5px solid var(--light-border); }
+.group-card h3 { font-size: 1rem; font-weight: 700; margin: 10px 0 8px; }
+.group-card p { font-size: 0.83rem; color: var(--mid-gray); line-height: 1.6; margin-bottom: 12px; }
+.group-meta { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; color: var(--mid-gray); }
+.group-meta span { display: flex; align-items: center; gap: 6px; }
+.faq-item { background: white; border-radius: 12px; border: 1.5px solid var(--light-border); margin-bottom: 12px; overflow: hidden; }
+.faq-q { padding: 18px 20px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
+.faq-q:hover { background: #f8f6f3; }
+.faq-a { padding: 0 20px 18px; font-size: 0.88rem; color: var(--mid-gray); line-height: 1.7; display: none; }
+.faq-item.open .faq-a { display: block; }
+.faq-item.open .faq-q { color: var(--deep-teal); }
+.aa-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.aa-table th { background: var(--deep-teal); color: white; padding: 14px 16px; font-size: 0.83rem; text-align: left; }
+.aa-table td { padding: 14px 16px; font-size: 0.85rem; border-bottom: 1px solid var(--light-border); }
+.aa-table tr:last-child td { border-bottom: none; }
+.aa-table tr:hover td { background: #f8f6f3; }
+</style>
+</head>
+<body>
+<div class="top-bar" id="top-bar"></div>
+<nav id="main-nav"></nav>
+<div class="crisis-banner" id="crisis-banner"></div>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> › Get Help</div>
+    <h1>Get Help</h1>
+    <p>You are not alone. Find culturally sensitive mental health support, crisis resources, and community groups — all in one place.</p>
+  </div>
+</div>
+
+<!-- PATHWAY CARDS -->
+<section class="section section-cream">
+  <div class="section-label">Where Would You Like to Start?</div>
+  <div class="section-title">I'm Looking For…</div>
+  <div class="help-pathways">
+    <a href="provider-directory.html" class="pathway-card">
+      <div class="pathway-icon" style="background:#E0F2F3">🩺</div>
+      <h3>A Therapist or Provider</h3>
+      <p>Search our directory of 500+ culturally aware mental health professionals.</p>
+    </a>
+    <a href="#support-groups" class="pathway-card">
+      <div class="pathway-icon" style="background:#FEF0E8">🤝</div>
+      <h3>A Free Support Group</h3>
+      <p>Join one of SAMHIN's free, culturally informed virtual and in-person groups.</p>
+    </a>
+    <a href="#aa" class="pathway-card">
+      <div class="pathway-icon" style="background:#FBF3E2">🕌</div>
+      <h3>AA / Recovery Support</h3>
+      <p>South Asian Alcoholics Anonymous meetings — virtual and in person.</p>
+    </a>
+    <a href="#crisis" class="pathway-card">
+      <div class="pathway-icon" style="background:#FDECEA">🚨</div>
+      <h3>Immediate Crisis Help</h3>
+      <p>If you or someone you know needs urgent support, these resources are available now.</p>
+    </a>
+  </div>
+</section>
+
+<!-- CRISIS RESOURCES -->
+<section class="section section-white" id="crisis">
+  <div class="section-label">Immediate Help</div>
+  <div class="section-title">Crisis & Emergency Resources</div>
+  <div class="section-sub">If you are in immediate danger, please call 911. For mental health crises, these helplines are available 24/7.</div>
+
+  <div class="hotline-card red">
+    <div>
+      <div class="hotline-number">988</div>
+      <div class="hotline-label">Suicide & Crisis Lifeline — Call or Text</div>
+    </div>
+    <div class="hotline-desc">Free, confidential support for people in distress. Available 24/7 nationwide. You can also chat online at 988lifeline.org.</div>
+    <a href="tel:988" class="btn-saffron">Call 988</a>
+  </div>
+
+  <div class="hotline-card teal" id="helpline">
+    <div>
+      <div class="hotline-number">732-902-2561</div>
+      <div class="hotline-label">SAMHIN Helpline — 10AM–7PM EST</div>
+    </div>
+    <div class="hotline-desc">Speak with someone who understands South Asian culture and mental health. Our volunteers are here to listen and connect you to resources.</div>
+    <a href="tel:7329022561" class="btn-primary">Call SAMHIN</a>
+  </div>
+
+  <div class="hotline-card">
+    <div>
+      <div class="hotline-number">911</div>
+      <div class="hotline-label">Emergency Services</div>
+    </div>
+    <div class="hotline-desc">For any immediate physical danger or medical emergency. Do not wait — call immediately.</div>
+    <a href="tel:911" class="btn-saffron">Call 911</a>
+  </div>
+
+  <div class="hotline-card" style="border-left-color: #7C3AED">
+    <div>
+      <div class="hotline-number">1-800-662-4357</div>
+      <div class="hotline-label">SAMHSA National Helpline</div>
+    </div>
+    <div class="hotline-desc">Free, confidential treatment referral and information for mental health and substance use disorders. Available 24/7, 365 days a year.</div>
+    <a href="tel:18006624357" class="btn-outline">Call SAMHSA</a>
+  </div>
+</section>
+
+<!-- SUPPORT GROUPS -->
+<section class="section section-cream" id="support-groups">
+  <div class="section-label">Free Programs</div>
+  <div class="section-title">SAMHIN Support Groups</div>
+  <div class="section-sub">All groups are free, confidential, and facilitated by mental health professionals. No registration required for most groups.</div>
+  <div class="groups-grid">
+    <div class="group-card">
+      <span class="tag tag-teal">Virtual</span>
+      <h3>Mental Wellness Support Group</h3>
+      <p>A safe space for South Asians to discuss mental health, share experiences, and build community. Open to all.</p>
+      <div class="group-meta">
+        <span>📅 Every other Saturday</span>
+        <span>🕐 10:00 AM – 11:30 AM EST</span>
+        <span>💻 Zoom (link provided on registration)</span>
+      </div>
+      <br><a href="mailto:info@samhin.org" class="btn-primary" style="font-size:0.82rem;padding:8px 16px">Register Free</a>
+    </div>
+    <div class="group-card">
+      <span class="tag tag-saffron">Virtual</span>
+      <h3>Desi Divorced Women's Support Group</h3>
+      <p>For South Asian women navigating divorce — addressing unique cultural pressures, shame, and rebuilding identity.</p>
+      <div class="group-meta">
+        <span>📅 Monthly (first Sunday)</span>
+        <span>🕐 2:00 PM – 3:30 PM EST</span>
+        <span>💻 Virtual via Zoom</span>
+      </div>
+      <br><a href="mailto:info@samhin.org" class="btn-primary" style="font-size:0.82rem;padding:8px 16px">Register Free</a>
+    </div>
+    <div class="group-card">
+      <span class="tag tag-purple">Virtual</span>
+      <h3>Janani Suicide Loss Survivor Support Group</h3>
+      <p>For South Asians who have lost a loved one to suicide. A compassionate space to grieve and heal together.</p>
+      <div class="group-meta">
+        <span>📅 Monthly (third Saturday)</span>
+        <span>🕐 11:00 AM – 12:30 PM EST</span>
+        <span>💻 Virtual via Zoom</span>
+      </div>
+      <br><a href="mailto:info@samhin.org" class="btn-primary" style="font-size:0.82rem;padding:8px 16px">Register Free</a>
+    </div>
+    <div class="group-card">
+      <span class="tag tag-gold">Virtual</span>
+      <h3>Sahara Grief Support Group</h3>
+      <p>Support for South Asians dealing with any form of grief and loss — death, divorce, health, or life transitions.</p>
+      <div class="group-meta">
+        <span>📅 Monthly (second Sunday)</span>
+        <span>🕐 3:00 PM – 4:30 PM EST</span>
+        <span>💻 Virtual via Zoom</span>
+      </div>
+      <br><a href="mailto:info@samhin.org" class="btn-primary" style="font-size:0.82rem;padding:8px 16px">Register Free</a>
+    </div>
+  </div>
+</section>
+
+<!-- AA MEETINGS -->
+<section class="section section-white" id="aa">
+  <div class="section-label">Recovery Support</div>
+  <div class="section-title">South Asian AA Meetings</div>
+  <div class="section-sub">Free virtual and in-person Alcoholics Anonymous meetings held in a culturally informed South Asian community context.</div>
+  <table class="aa-table">
+    <thead>
+      <tr><th>Meeting Name</th><th>Day & Time</th><th>Format</th><th>Contact</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Global Gratitude Group</strong></td><td>Mondays & Thursdays, 8:00 PM EST</td><td>Virtual (Zoom)</td><td><a href="mailto:info@samhin.org" style="color:var(--deep-teal)">info@samhin.org</a></td></tr>
+      <tr><td><strong>Mangalore AA Meeting</strong></td><td>Saturdays, 10:00 AM EST</td><td>Virtual (Zoom)</td><td><a href="mailto:info@samhin.org" style="color:var(--deep-teal)">info@samhin.org</a></td></tr>
+      <tr><td><strong>South Asian NA Meeting</strong></td><td>Sundays, 6:00 PM EST</td><td>Virtual (Zoom)</td><td><a href="mailto:info@samhin.org" style="color:var(--deep-teal)">info@samhin.org</a></td></tr>
+      <tr><td><strong>Al-Anon (Family Support)</strong></td><td>Wednesdays, 7:00 PM EST</td><td>Virtual (Zoom)</td><td><a href="mailto:info@samhin.org" style="color:var(--deep-teal)">info@samhin.org</a></td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:16px; font-size:0.82rem; color:var(--mid-gray)">Note: SAMHIN connects community members to these meetings and supports awareness. These are independent AA/NA groups. <a href="resources.html" style="color:var(--deep-teal)">View all resources →</a></p>
+</section>
+
+<!-- FAQ -->
+<section class="section section-cream">
+  <div class="section-label">Common Questions</div>
+  <div class="section-title">Mental Health FAQs</div>
+  <div class="section-sub">Culturally informed answers to common mental health questions in South Asian communities.</div>
+  <div style="max-width:800px">
+    <div class="faq-item open">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What is the difference between a support group and therapy? <span>▾</span></div>
+      <div class="faq-a">A support group is a peer-facilitated space where people with shared experiences come together for mutual support — it is not a substitute for professional mental health treatment. Therapy (or counseling) involves working one-on-one (or in small groups) with a licensed mental health professional to address specific mental health concerns. Both can be valuable, and many people benefit from both simultaneously.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How do I talk to my parents about seeking mental health help? <span>▾</span></div>
+      <div class="faq-a">This is one of the most common challenges in South Asian communities. Consider starting the conversation by framing mental health care similarly to physical health care — you wouldn't ignore a broken bone, and you shouldn't ignore emotional pain either. Acknowledge the stigma exists while gently challenging it. Many families respond better when concerns are framed around performance, stress, or "being more productive" rather than "mental illness."</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Are mental health services confidential? <span>▾</span></div>
+      <div class="faq-a">Yes. Licensed mental health professionals are legally bound by confidentiality laws. They cannot share your information without your written consent, with very limited exceptions (such as imminent risk of harm to yourself or others). SAMHIN's support groups also maintain confidentiality within the group.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What if I can't afford therapy? <span>▾</span></div>
+      <div class="faq-a">There are several options: (1) SAMHIN's free support groups, (2) Community mental health centers which offer sliding-scale fees, (3) University training clinics, (4) Open Path Collective for reduced-cost therapy, (5) Many insurers are required to cover mental health at the same level as physical health. Contact SAMHIN at 732-902-2561 and we can help connect you to affordable care.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Is depression the same as being sad? <span>▾</span></div>
+      <div class="faq-a">No. While sadness is a normal emotion that everyone experiences, clinical depression (Major Depressive Disorder) is a medical condition characterized by persistent low mood, loss of interest in activities, changes in sleep and appetite, difficulty concentrating, and sometimes thoughts of death or suicide — lasting more than two weeks and significantly impacting daily functioning. In South Asian communities, depression may sometimes manifest more as physical symptoms (fatigue, headaches, body pain) rather than sadness.</div>
+    </div>
+  </div>
+  <a href="resources.html" class="view-all-link">View all FAQs and resources →</a>
+</section>
+
+<div class="donate-strip" id="donate-banner"></div>
+<footer id="main-footer"></footer>
+<script src="shared.js"></script>
+<script>
+  injectTopBar(); injectNav('get-help.html'); injectCrisisBanner(); injectFooter(); injectDonateBanner();
+</script>
+</body>
+</html>

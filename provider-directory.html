@@ -1,0 +1,363 @@
+/**
+ * Project: SAMHIN First Draft
+ * Author: Vishavdeep Sharma
+ * Company: Navonsys Inc
+ * Date: 2026-02-26
+ * Description: Facilitates searching and filtering through the network's mental health provider directory.
+ */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find a Provider – SAMHIN</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.dir-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; }
+.filter-panel { background: white; border-radius: 14px; border: 1.5px solid var(--light-border); padding: 24px; position: sticky; top: 80px; }
+.filter-panel h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 18px; display: flex; justify-content: space-between; }
+.filter-panel h3 a { font-size: 0.78rem; font-weight: 500; color: var(--saffron); text-decoration: none; }
+.filter-section { margin-bottom: 20px; }
+.filter-section h4 { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--mid-gray); margin-bottom: 10px; }
+.filter-check { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 0.84rem; cursor: pointer; }
+.filter-check input { accent-color: var(--deep-teal); width: 15px; height: 15px; }
+.filter-select { width: 100%; border: 1.5px solid var(--light-border); border-radius: 8px; padding: 9px 12px; font-size: 0.84rem; font-family: 'DM Sans', sans-serif; }
+.results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+.results-count { font-size: 0.88rem; color: var(--mid-gray); }
+.view-toggle { display: flex; gap: 6px; }
+.view-btn { background: none; border: 1.5px solid var(--light-border); border-radius: 6px; padding: 7px 12px; cursor: pointer; font-size: 0.78rem; }
+.view-btn.active { background: var(--deep-teal); color: white; border-color: var(--deep-teal); }
+.provider-card { background: white; border-radius: 14px; border: 1.5px solid var(--light-border); padding: 20px; display: flex; gap: 18px; margin-bottom: 16px; transition: box-shadow 0.2s; }
+.provider-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.1); }
+.provider-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: var(--deep-teal); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 1.6rem; font-weight: 700; color: white; }
+.provider-info { flex: 1; }
+.provider-name { font-size: 1.05rem; font-weight: 700; color: var(--deep-teal); margin-bottom: 3px; }
+.provider-creds { font-size: 0.8rem; color: var(--mid-gray); margin-bottom: 6px; }
+.provider-location { font-size: 0.8rem; color: var(--mid-gray); margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+.provider-bio { font-size: 0.83rem; color: var(--charcoal); line-height: 1.6; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.provider-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.provider-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; min-width: 120px; }
+.provider-phone { font-weight: 700; font-size: 0.92rem; white-space: nowrap; color: var(--charcoal); text-decoration: none; }
+.provider-phone:hover { color: var(--deep-teal); }
+.provider-email-btn, .provider-view-btn { background: none; border: 1.5px solid var(--light-border); border-radius: 6px; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; white-space: nowrap; text-decoration: none; color: var(--charcoal); display: block; transition: all 0.2s; }
+.provider-email-btn:hover { background: var(--deep-teal); color: white; border-color: var(--deep-teal); }
+.provider-view-btn { background: var(--deep-teal); color: white; border-color: var(--deep-teal); }
+.provider-view-btn:hover { background: #145558; }
+.search-bar-top { display: flex; gap: 10px; background: white; padding: 16px; border-radius: 12px; border: 1.5px solid var(--light-border); margin-bottom: 20px; }
+.search-bar-top input { flex: 1; border: 1.5px solid var(--light-border); border-radius: 8px; padding: 10px 14px; font-size: 0.88rem; font-family: 'DM Sans', sans-serif; }
+.search-bar-top button { background: var(--deep-teal); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; }
+.register-cta { background: linear-gradient(135deg, #0d4a4d, #1A6B6E); border-radius: 14px; padding: 28px; color: white; text-align: center; margin-bottom: 24px; }
+.register-cta h3 { font-family: 'Lora', serif; font-size: 1.3rem; margin-bottom: 8px; }
+.register-cta p { font-size: 0.85rem; opacity: 0.8; margin-bottom: 16px; }
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 16px; padding: 32px; max-width: 640px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; }
+.modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--mid-gray); }
+.modal-provider-header { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--light-border); }
+.modal-avatar { width: 100px; height: 100px; border-radius: 50%; background: var(--deep-teal); display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 2rem; font-weight: 700; color: white; flex-shrink: 0; }
+.connect-panel { background: var(--warm-cream); border-radius: 12px; padding: 20px; float: right; margin-left: 24px; min-width: 200px; }
+.connect-panel h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 12px; }
+@media(max-width:900px) { .dir-layout { grid-template-columns: 1fr; } .filter-panel { position: static; } .provider-card { flex-direction: column; } .provider-actions { flex-direction: row; align-items: center; } }
+</style>
+</head>
+<body>
+<div class="top-bar" id="top-bar"></div>
+<nav id="main-nav"></nav>
+<div class="crisis-banner" id="crisis-banner"></div>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> › Find a Provider</div>
+    <h1>Find a Mental Health Provider</h1>
+    <p>Browse 500+ South Asian–friendly therapists, psychiatrists, and counselors. Filter by specialty, language, insurance, and more.</p>
+  </div>
+</div>
+
+<section class="section section-cream" style="padding-bottom:0">
+  <div class="search-bar-top">
+    <input type="text" id="main-search" placeholder="🔍 Search by name, specialty, city, or ZIP code…">
+    <button onclick="filterProviders()">Search</button>
+  </div>
+</section>
+
+<section class="section section-cream" style="padding-top:16px">
+  <div class="dir-layout">
+    <!-- FILTERS -->
+    <div class="filter-panel">
+      <h3>Filters <a href="#" onclick="clearFilters();return false">Clear all</a></h3>
+      <div class="filter-section">
+        <h4>Mode</h4>
+        <label class="filter-check"><input type="checkbox" value="in-person"> In Person</label>
+        <label class="filter-check"><input type="checkbox" value="telehealth" checked> Telehealth</label>
+        <label class="filter-check"><input type="checkbox" value="both"> Both</label>
+      </div>
+      <div class="filter-section">
+        <h4>Specialty</h4>
+        <label class="filter-check"><input type="checkbox"> Anxiety</label>
+        <label class="filter-check"><input type="checkbox"> Depression</label>
+        <label class="filter-check"><input type="checkbox"> Trauma & PTSD</label>
+        <label class="filter-check"><input type="checkbox"> Addiction</label>
+        <label class="filter-check"><input type="checkbox"> Relationship Issues</label>
+        <label class="filter-check"><input type="checkbox"> Child & Adolescent</label>
+        <label class="filter-check"><input type="checkbox"> Grief & Loss</label>
+        <label class="filter-check"><input type="checkbox"> Eating Disorders</label>
+      </div>
+      <div class="filter-section">
+        <h4>Language</h4>
+        <label class="filter-check"><input type="checkbox"> Hindi</label>
+        <label class="filter-check"><input type="checkbox"> Punjabi</label>
+        <label class="filter-check"><input type="checkbox"> Bengali</label>
+        <label class="filter-check"><input type="checkbox"> Urdu</label>
+        <label class="filter-check"><input type="checkbox"> Tamil</label>
+        <label class="filter-check"><input type="checkbox"> Gujarati</label>
+        <label class="filter-check"><input type="checkbox"> Telugu</label>
+      </div>
+      <div class="filter-section">
+        <h4>Insurance</h4>
+        <select class="filter-select">
+          <option>Any Insurance</option><option>Aetna</option><option>Blue Cross Blue Shield</option>
+          <option>Cigna</option><option>United Health</option><option>Medicaid</option><option>Medicare</option><option>Self-Pay / Sliding Scale</option>
+        </select>
+      </div>
+      <div class="filter-section">
+        <h4>Cultural Expertise</h4>
+        <label class="filter-check"><input type="checkbox"> South Asian Culture</label>
+        <label class="filter-check"><input type="checkbox"> Immigration Issues</label>
+        <label class="filter-check"><input type="checkbox"> Intergenerational Conflict</label>
+        <label class="filter-check"><input type="checkbox"> Bicultural Identity</label>
+      </div>
+      <div class="filter-section">
+        <h4>Licensing State</h4>
+        <select class="filter-select">
+          <option>Any State</option><option>NJ</option><option>NY</option><option>CA</option><option>TX</option><option>FL</option><option>PA</option><option>IL</option><option>MA</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div>
+      <div class="register-cta">
+        <h3>Are You a Provider?</h3>
+        <p>Join SAMHIN's free directory and connect with South Asian clients who need your expertise.</p>
+        <a href="provider-register.html" class="btn-white">Register Your Profile →</a>
+      </div>
+
+      <div class="results-header">
+        <span class="results-count" id="results-count">Showing 6 of 500+ providers</span>
+        <div class="view-toggle">
+          <button class="view-btn active">☰ List</button>
+          <button class="view-btn">🗺 Map</button>
+        </div>
+      </div>
+
+      <div id="provider-list">
+        <!-- Provider Cards -->
+        <div class="provider-card">
+          <div class="provider-avatar">DR</div>
+          <div class="provider-info">
+            <div class="provider-name">Dr. Ritu Sharma, MD</div>
+            <div class="provider-creds">Psychiatrist · Board Certified</div>
+            <div class="provider-location">📍 Edison, NJ 08820 · Telehealth Available</div>
+            <div class="provider-bio">Specializing in mood disorders, anxiety, and trauma with a deep understanding of South Asian cultural dynamics. I provide both medication management and therapy. Fluent in Hindi and English. Accepting new patients.</div>
+            <div class="provider-tags">
+              <span class="tag tag-teal">Anxiety</span>
+              <span class="tag tag-teal">Depression</span>
+              <span class="tag tag-saffron">Hindi</span>
+              <span class="tag tag-gold">Telehealth</span>
+            </div>
+          </div>
+          <div class="provider-actions">
+            <a href="tel:7321234567" class="provider-phone">(732) 123-4567</a>
+            <a href="mailto:dr.sharma@example.com" class="provider-email-btn">Email</a>
+            <a href="#" class="provider-view-btn" onclick="openModal('Dr. Ritu Sharma, MD', 'Psychiatrist', 'Edison, NJ', 'DR');return false">View</a>
+          </div>
+        </div>
+
+        <div class="provider-card">
+          <div class="provider-avatar">AP</div>
+          <div class="provider-info">
+            <div class="provider-name">Ananya Patel, LCSW</div>
+            <div class="provider-creds">Licensed Clinical Social Worker · Therapist</div>
+            <div class="provider-location">📍 Princeton, NJ 08540 · In Person & Telehealth</div>
+            <div class="provider-bio">I work with South Asian individuals, couples, and families navigating cultural identity, intergenerational conflict, relationship issues, and life transitions. My approach integrates CBT and mindfulness with cultural humility.</div>
+            <div class="provider-tags">
+              <span class="tag tag-teal">Relationship Issues</span>
+              <span class="tag tag-teal">Anxiety</span>
+              <span class="tag tag-saffron">Gujarati</span>
+              <span class="tag tag-gold">In Person</span>
+            </div>
+          </div>
+          <div class="provider-actions">
+            <a href="tel:6091234567" class="provider-phone">(609) 123-4567</a>
+            <a href="mailto:apatel@example.com" class="provider-email-btn">Email</a>
+            <a href="#" class="provider-view-btn" onclick="openModal('Ananya Patel, LCSW', 'Licensed Clinical Social Worker', 'Princeton, NJ', 'AP');return false">View</a>
+          </div>
+        </div>
+
+        <div class="provider-card">
+          <div class="provider-avatar">VK</div>
+          <div class="provider-info">
+            <div class="provider-name">Vikram Kumar, PhD</div>
+            <div class="provider-creds">Licensed Psychologist</div>
+            <div class="provider-location">📍 New York, NY 10001 · Telehealth Only</div>
+            <div class="provider-bio">Specializing in trauma, PTSD, and addiction recovery with particular expertise in South Asian men's mental health. I offer a non-judgmental space where cultural identity is understood and respected. Fluent in Punjabi.</div>
+            <div class="provider-tags">
+              <span class="tag tag-teal">Trauma & PTSD</span>
+              <span class="tag tag-teal">Addiction</span>
+              <span class="tag tag-saffron">Punjabi</span>
+              <span class="tag tag-gold">Telehealth</span>
+            </div>
+          </div>
+          <div class="provider-actions">
+            <a href="tel:2121234567" class="provider-phone">(212) 123-4567</a>
+            <a href="mailto:vkumar@example.com" class="provider-email-btn">Email</a>
+            <a href="#" class="provider-view-btn" onclick="openModal('Vikram Kumar, PhD', 'Licensed Psychologist', 'New York, NY', 'VK');return false">View</a>
+          </div>
+        </div>
+
+        <div class="provider-card">
+          <div class="provider-avatar">PM</div>
+          <div class="provider-info">
+            <div class="provider-name">Priya Mehta, LPC</div>
+            <div class="provider-creds">Licensed Professional Counselor</div>
+            <div class="provider-location">📍 Cherry Hill, NJ 08002 · In Person & Telehealth</div>
+            <div class="provider-bio">Working with children, adolescents, and adults from South Asian families. Special focus on eating disorders, body image, and the pressures placed on second-generation South Asians. Speaks Tamil and English.</div>
+            <div class="provider-tags">
+              <span class="tag tag-teal">Eating Disorders</span>
+              <span class="tag tag-teal">Child & Adolescent</span>
+              <span class="tag tag-saffron">Tamil</span>
+            </div>
+          </div>
+          <div class="provider-actions">
+            <a href="tel:8561234567" class="provider-phone">(856) 123-4567</a>
+            <a href="mailto:pmehta@example.com" class="provider-email-btn">Email</a>
+            <a href="#" class="provider-view-btn" onclick="openModal('Priya Mehta, LPC', 'Licensed Professional Counselor', 'Cherry Hill, NJ', 'PM');return false">View</a>
+          </div>
+        </div>
+
+        <div class="provider-card">
+          <div class="provider-avatar">SR</div>
+          <div class="provider-info">
+            <div class="provider-name">Sunita Rao, LMFT</div>
+            <div class="provider-creds">Licensed Marriage & Family Therapist</div>
+            <div class="provider-location">📍 Iselin, NJ 08830 · In Person</div>
+            <div class="provider-bio">Specializing in couples therapy, family systems, and intergenerational trauma within South Asian contexts. I integrate culturally adapted Emotionally Focused Therapy (EFT) and narrative approaches. Telugu and Kannada speaker.</div>
+            <div class="provider-tags">
+              <span class="tag tag-teal">Couples Therapy</span>
+              <span class="tag tag-teal">Family Systems</span>
+              <span class="tag tag-saffron">Telugu</span>
+            </div>
+          </div>
+          <div class="provider-actions">
+            <a href="tel:7321239876" class="provider-phone">(732) 123-9876</a>
+            <a href="mailto:srao@example.com" class="provider-email-btn">Email</a>
+            <a href="#" class="provider-view-btn" onclick="openModal('Sunita Rao, LMFT', 'Marriage & Family Therapist', 'Iselin, NJ', 'SR');return false">View</a>
+          </div>
+        </div>
+
+        <div class="provider-card">
+          <div class="provider-avatar">AK</div>
+          <div class="provider-info">
+            <div class="provider-name">Arjun Kapoor, LCSW</div>
+            <div class="provider-creds">Licensed Clinical Social Worker</div>
+            <div class="provider-location">📍 Parsippany, NJ 07054 · Telehealth Available</div>
+            <div class="provider-bio">Working at the intersection of South Asian identity, masculinity, and mental health. My practice welcomes men who have been told that seeking help is a sign of weakness. Accepting Aetna, Cigna, BCBS. Urdu and Hindi speaker.</div>
+            <div class="provider-tags">
+              <span class="tag tag-teal">Men's Mental Health</span>
+              <span class="tag tag-teal">Depression</span>
+              <span class="tag tag-saffron">Urdu</span>
+              <span class="tag tag-saffron">Hindi</span>
+            </div>
+          </div>
+          <div class="provider-actions">
+            <a href="tel:9731234567" class="provider-phone">(973) 123-4567</a>
+            <a href="mailto:akapoor@example.com" class="provider-email-btn">Email</a>
+            <a href="#" class="provider-view-btn" onclick="openModal('Arjun Kapoor, LCSW', 'Licensed Clinical Social Worker', 'Parsippany, NJ', 'AK');return false">View</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-top:24px">
+        <button class="btn-outline" onclick="alert('Loading more providers…')">Load More Providers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Provider Profile Modal -->
+<div class="modal-overlay" id="provider-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-provider-header">
+      <div class="modal-avatar" id="modal-avatar">DR</div>
+      <div>
+        <h2 style="font-family:'Lora',serif;font-size:1.4rem;color:var(--deep-teal)" id="modal-name">Dr. Ritu Sharma, MD</h2>
+        <div style="color:var(--mid-gray);font-size:0.85rem;margin-top:4px" id="modal-creds">Psychiatrist</div>
+        <div style="color:var(--mid-gray);font-size:0.85rem;margin-top:2px" id="modal-location">📍 Edison, NJ</div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap" id="modal-tags"></div>
+      </div>
+    </div>
+    <div class="connect-panel">
+      <h4>Let's Connect</h4>
+      <a href="tel:7321234567" style="display:block;font-weight:700;color:var(--charcoal);text-decoration:none;margin-bottom:10px" id="modal-phone">(732) 123-4567</a>
+      <a href="mailto:provider@example.com" class="btn-primary" style="display:block;text-align:center;font-size:0.85rem;margin-bottom:8px">Email Me</a>
+    </div>
+    <p style="font-size:0.88rem;color:var(--charcoal);line-height:1.8;margin-bottom:16px">
+      Specializing in mood disorders, anxiety, and trauma with a deep understanding of South Asian cultural dynamics. I provide both medication management and therapy. Fluent in Hindi and English. Accepting new patients with most major insurances.
+    </p>
+    <p style="font-size:0.88rem;color:var(--charcoal);line-height:1.8;margin-bottom:16px">
+      I completed my residency at Robert Wood Johnson Medical School and have been serving the NJ community for over 15 years. My practice is built on the belief that mental health is just as important as physical health — and that culturally informed care makes all the difference.
+    </p>
+    <div style="clear:both; border-top:1px solid var(--light-border); padding-top:16px; margin-top:8px">
+      <h4 style="font-size:0.85rem;font-weight:600;margin-bottom:8px">Practice at a Glance</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.82rem;color:var(--mid-gray)">
+        <span>✅ Accepting new patients</span>
+        <span>💳 Aetna, BCBS, Cigna</span>
+        <span>💻 Telehealth available</span>
+        <span>🗣️ Hindi, English</span>
+        <span>📍 In-person: Edison, NJ</span>
+        <span>👤 Individuals & families</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="donate-strip" id="donate-banner"></div>
+<footer id="main-footer"></footer>
+<script src="shared.js"></script>
+<script>
+  injectTopBar(); injectNav('provider-directory.html'); injectCrisisBanner(); injectFooter(); injectDonateBanner();
+
+  function openModal(name, creds, location, initials) {
+    document.getElementById('modal-name').textContent = name;
+    document.getElementById('modal-creds').textContent = creds;
+    document.getElementById('modal-location').textContent = '📍 ' + location;
+    document.getElementById('modal-avatar').textContent = initials;
+    document.getElementById('provider-modal').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('provider-modal').classList.remove('open');
+  }
+  document.getElementById('provider-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  function filterProviders() {
+    const q = document.getElementById('main-search').value.toLowerCase();
+    const cards = document.querySelectorAll('.provider-card');
+    let shown = 0;
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      const match = !q || text.includes(q);
+      card.style.display = match ? 'flex' : 'none';
+      if (match) shown++;
+    });
+    document.getElementById('results-count').textContent = `Showing ${shown} provider${shown!==1?'s':''}`;
+  }
+  function clearFilters() {
+    document.querySelectorAll('.filter-check input').forEach(cb => cb.checked = false);
+    document.getElementById('main-search').value = '';
+    filterProviders();
+  }
+</script>
+</body>
+</html>
